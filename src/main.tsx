@@ -28,12 +28,14 @@ function Model({body,chosen}:{body:Body;chosen:Item[]}) {
   const skin='#d9c9bf';
   const mat=(i?:Item)=>({color:i?.color||skin,roughness:i?.texture==='Satin'?.38:.88,metalness:i?.texture==='Satin'?.08:0});
   const upper=outer||dress||top;
+  const sleeveless=!!dress&&!outer || !!top&&!outer&&/tank|cami|sleeveless/i.test(top.name);
+  const longSleeve=!!outer || !!top&&/hoodie|sweatshirt|long sleeve|cardigan/i.test(top.name);
   return <group scale={[body.proportion,body.height,body.proportion]} position={[0,-1.65,0]}>
     {/* The mannequin remains visible wherever a garment is absent. */}
     <mesh position={[0,3.05,0]} scale={[.87,1,.9]}><sphereGeometry args={[.25,32,32]}/><meshStandardMaterial color={skin}/></mesh>
     {/* A softly styled face and hair make the fitting model feel more human. */}
     <mesh position={[0,3.12,-.065]} scale={[1.02,1.08,.92]}><sphereGeometry args={[.255,32,32]}/><meshStandardMaterial color="#4a342d" roughness={.95}/></mesh>
-    <mesh position={[0,2.95,-.145]} scale={[.94,1.4,.48]}><sphereGeometry args={[.25,32,32]}/><meshStandardMaterial color="#4a342d" roughness={.95}/></mesh>
+    <mesh position={[0,2.85,-.145]} scale={[.94,1.9,.48]}><sphereGeometry args={[.25,32,32]}/><meshStandardMaterial color="#4a342d" roughness={.95}/></mesh>
     <mesh position={[0,3.04,.015]} scale={[.82,1,.87]}><sphereGeometry args={[.245,32,32]}/><meshStandardMaterial color={skin} roughness={.8}/></mesh>
     {[-1,1].map(n=><group key={'face'+n}><mesh position={[n*.077,3.07,.205]} scale={[1,.6,.4]}><sphereGeometry args={[.019,16,12]}/><meshStandardMaterial color="#463c38"/></mesh><mesh position={[n*.077,3.118,.19]} rotation={[0,0,n*.09]}><capsuleGeometry args={[.008,.065,4,12]}/><meshStandardMaterial color="#57453c"/></mesh><mesh position={[n*.21,3.025,.015]} scale={[.45,.8,.4]}><sphereGeometry args={[.055,16,16]}/><meshStandardMaterial color={skin}/></mesh></group>)}
     <mesh position={[0,3.018,.221]} scale={[.45,1,.6]}><sphereGeometry args={[.026,16,16]}/><meshStandardMaterial color="#c9b3a8"/></mesh>
@@ -48,10 +50,10 @@ function Model({body,chosen}:{body:Body;chosen:Item[]}) {
     </group>)}
     {/* Layered bodice, sleeves and collar create a recognizable garment rather than coloring the mannequin. */}
     {upper&&<group>
-      <mesh position={[0,2.26,0]} scale={[body.shoulders,1,.66]}><cylinderGeometry args={[.405,.31,.81,32,1]}/><meshStandardMaterial {...mat(upper)}/></mesh>
+      <mesh position={[0,sleeveless?2.18:2.26,0]} scale={[body.shoulders,1,.66]}><cylinderGeometry args={[sleeveless?.35:.405,.31,sleeveless?.65:.81,32,1]}/><meshStandardMaterial {...mat(upper)}/></mesh>
       <mesh position={[0,1.86,0]} scale={[body.waist,1,.67]}><cylinderGeometry args={[.315,.32,.08,32]}/><meshStandardMaterial {...mat(upper)}/></mesh>
-      {[-1,1].map(n=><mesh key={'sleeve'+n} position={[n*.44*body.shoulders,outer?2.16:2.42,0]} rotation={[0,0,n*.13]} scale={[1,1,.8]}><cylinderGeometry args={[.135,.115,outer?.86:.34,24]}/><meshStandardMaterial {...mat(upper)}/></mesh>)}
-      <mesh position={[0,2.66,.025]} rotation={[Math.PI/2,0,0]} scale={[1,.75,1]}><torusGeometry args={[.12,.025,8,32]}/><meshStandardMaterial color={outer?'#e6d9d1':upper.color} roughness={.8}/></mesh>
+      {sleeveless?[-1,1].map(n=><mesh key={'strap'+n} position={[n*.19*body.shoulders,2.58,.12]} rotation={[0,0,n*.1]}><boxGeometry args={[.025,.28,.025]}/><meshStandardMaterial {...mat(upper)}/></mesh>):[-1,1].map(n=><mesh key={'sleeve'+n} position={[n*.44*body.shoulders,longSleeve?2.16:2.42,0]} rotation={[0,0,n*.13]} scale={[1,1,.8]}><cylinderGeometry args={[.135,.115,longSleeve?.86:.34,24]}/><meshStandardMaterial {...mat(upper)}/></mesh>)}
+      {!sleeveless&&<mesh position={[0,2.66,.025]} rotation={[Math.PI/2,0,0]} scale={[1,.75,1]}><torusGeometry args={[.12,.025,8,32]}/><meshStandardMaterial color={outer?'#e6d9d1':upper.color} roughness={.8}/></mesh>}
       {outer&&<><mesh position={[0,2.27,.245]}><boxGeometry args={[.018,.7,.018]}/><meshStandardMaterial color="#e7d8ce"/></mesh>{[2.39,2.22,2.05].map(y=><mesh key={y} position={[.025,y,.255]}><sphereGeometry args={[.016,12,12]}/><meshStandardMaterial color="#ded0c5"/></mesh>)}</>}
     </group>}
     {dress&&<group scale={[body.hips,1,1]}><mesh position={[0,1.44,0]} scale={[1,1,.67]}><cylinderGeometry args={[.31,.52,.9,40,1]}/><meshStandardMaterial {...mat(dress)} side={2}/></mesh><mesh position={[0,.995,0]} scale={[1,1,.67]}><cylinderGeometry args={[.525,.525,.025,40]}/><meshStandardMaterial {...mat(dress)}/></mesh></group>}
